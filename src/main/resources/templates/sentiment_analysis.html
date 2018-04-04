@@ -9,10 +9,16 @@
 <body>
 
 <div class="container-fluid">
-    <h1><span th:text="${greeting}"></span></h1>
+    <h1>Sentiment Analysis Results</h1>
 
-    <h2>User feedback:</h2>
-    <p><span th:text="${text}"></span></p>
+    <h3>Source text:</h3>
+    <p><span th:text="${sentiment_analysis.getSourceText()}"></span></p>
+
+    <h3>Sentiment:</h3>
+    <p><span th:text="${sentiment_analysis.getSentiment()}"></span></p>
+
+    <h3>Analyzed on:</h3>
+    <p><span th:text="${sentiment_analysis.getUpdatedAt()}"></span></p>
 
 </div>
 <script src="webjars/jquery/3.3.1/jquery.min.js"></script>

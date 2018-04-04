@@ -2,21 +2,27 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>CerePro</title>
+    <title>$Title$</title>
     <link href="webjars/bootstrap/4.0.0-2/css/bootstrap.min.css" rel="stylesheet">
 
 </head>
 <body>
 
 <div class="container-fluid">
-    <h1><span th:text="${greeting}"></span></h1>
+<h1>Sentiment Analysis</h1>
 
-    <h2>User feedback:</h2>
-    <p><span th:text="${text}"></span></p>
+<form action="#" th:action="@{/analyze/sentiment}" th:object="${sentiment_analysis}" method="post">
+    <p>Text to analyze</p>
+    <input type="text" th:field="*{sourceText}"/><br>
+    <input type="submit" value="Analyze"/>
+</form>
 
 </div>
+
 <script src="webjars/jquery/3.3.1/jquery.min.js"></script>
 <script src="webjars/bootstrap/4.0.0-2/js/bootstrap.min.js"></script>
 
+
 </body>
 </html>
+
