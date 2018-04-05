@@ -5,6 +5,8 @@ import io.cerepro.app.models.SentimentAnalysis;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class SentimentAnalysisService {
 
@@ -17,5 +19,13 @@ public class SentimentAnalysisService {
 
     public void saveSentimentAnalysis(SentimentAnalysis sentimentAnalysis) {
         sentimentAnalysisRepository.save(sentimentAnalysis);
+    }
+
+    public List<SentimentAnalysis> findAll() {
+        return sentimentAnalysisRepository.findAll();
+    }
+
+    public List<SentimentAnalysis> findAllBySentiment(String sentiment) {
+        return sentimentAnalysisRepository.findAllBySentiment(sentiment);
     }
 }

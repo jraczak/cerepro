@@ -4,6 +4,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
+import java.text.DecimalFormat;
 import java.util.Date;
 
 @Entity
@@ -15,11 +16,17 @@ public class SentimentAnalysis {
     @Column(name = "sentiment_analysis_id")
     private Long id;
 
-    @Column(name = "source_text")
+    @Column(name = "source_text", length = 2000)
     private String sourceText;
 
     @Column(name = "sentiment")
     private String sentiment;
+
+    @Column(name = "sentiment_score")
+    private double sentimentScore;
+
+    @Column(name = "sentiment_magnitude")
+    private double sentimentMagnitude;
 
     @Column(name = "is_analyzed")
     private boolean isAnalyzed;
@@ -32,10 +39,12 @@ public class SentimentAnalysis {
     @UpdateTimestamp
     private Date updatedAt;
 
-    //TODO Persist the object to the database
     public SentimentAnalysis(String sourceText) {
         this.sourceText = sourceText;
+    }
 
+    // Default obligatory empty constructor
+    public SentimentAnalysis() {
 
     }
 
@@ -85,5 +94,40 @@ public class SentimentAnalysis {
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public double getSentimentScore() {
+
+        return sentimentScore;
+    }
+
+    public String getDisplaySentimentScore() {
+        DecimalFormat format = new DecimalFormat("####0.00");
+        return format.format(sentimentScore);
+    }
+
+    public void setSentimentScore(double sentimentScore) {
+        this.sentimentScore = sentimentScore;
+    }
+
+    public String convertSentimentScore(double sentimentScore) {
+        String sentiment = "";
+        if (sentimentScore == 0.0) sentiment = "neutral";
+        else if (sentimentScore < 0.0) sentiment = "negative";
+        else if (sentimentScore > 0.0) sentiment = "positive";
+        return sentiment;
+    }
+
+    public double getSentimentMagnitude() {
+        return sentimentMagnitude;
+    }
+
+    public String getDisplaySentimentMagnitude() {
+        DecimalFormat format = new DecimalFormat("####0.00");
+        return format.format(sentimentMagnitude);
+    }
+
+    public void setSentimentMagnitude(double sentimentMagnitude) {
+        this.sentimentMagnitude = sentimentMagnitude;
     }
 }

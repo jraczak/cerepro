@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Sentiment Overview</title>
+    <link th:href="@{/webjars/bootstrap/4.0.0-2/css/bootstrap.min.css}" rel="stylesheet">
+    <link href="/webjars/bootstrap/4.0.0-2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-lg">
+            <h2>Sentiment Summary</h2>
+            <p>Average sentiment score: <span th:text="${#numbers.formatDecimal(average_sentiment, 1, 'COMMA', 2, 'POINT')}"></span></p>
+            <p>Total entries analyzed: <span th:text="${total_analyses}"></span> </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg">
+            <table class="table-bordered">
+                <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Feedback</th>
+                    <th scope="col">Sentiment</th>
+                    <th scope="col">Raw Score</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="analysis : ${analyses}">
+                    <td th:text="${analysis.getId()}"></td>
+                    <td th:text="${analysis.getSourceText()}"></td>
+                    <td th:text="${analysis.getSentiment()}"></td>
+                    <td th:text="${analysis.getDisplaySentimentScore()}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="webjars/jquery/3.3.1/jquery.min.js"></script>
+<script src="webjars/bootstrap/4.0.0-2/js/bootstrap.min.js"></script>
+</body>
+</html>
+ 

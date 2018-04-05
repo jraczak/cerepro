@@ -3,20 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <title>$Title$</title>
-    <link href="webjars/bootstrap/4.0.0-2/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/webjars/bootstrap/4.0.0-2/css/bootstrap.min.css}" rel="stylesheet">
+    <link href="/webjars/bootstrap/4.0.0-2/css/bootstrap.min.css" rel="stylesheet">
 
 </head>
 <body>
 
 <div class="container-fluid">
-<h1>Sentiment Analysis</h1>
+    <div class="row">
+        <div class="col-lg">
+            <h1>Sentiment Analysis</h1>
 
-<form action="#" th:action="@{/analyze/sentiment}" th:object="${sentiment_analysis}" method="post">
-    <p>Text to analyze</p>
-    <input type="text" th:field="*{sourceText}"/><br>
-    <input type="submit" value="Analyze"/>
-</form>
-
+            <form action="#" th:action="@{/analyze/sentiment}" th:object="${sentiment_analysis}" method="post">
+                <div class="form-group">
+                    <label for="sourceText" th:for="*{sourceText}">Text to analyze</label>
+                    <textarea class="form-control" type="text" th:field="*{sourceText}"></textarea><br>
+                </div>
+                <input class="btn btn-primary" type="submit" value="Analyze"/>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script src="webjars/jquery/3.3.1/jquery.min.js"></script>
