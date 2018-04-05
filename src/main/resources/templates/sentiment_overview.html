@@ -7,12 +7,35 @@
     <link href="/webjars/bootstrap/4.0.0-2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+    <a class="navbar-brand" href="/">CerePro</a>
+
+    <div class="collapse navbar-collapse">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="/sentiment">Sentiment Overview</a>
+            </li>
+        </ul>
+    </div>
+    </div>
+</nav>
+
 <div class="container">
     <div class="row">
         <div class="col-lg">
+            <br>
             <h2>Sentiment Summary</h2>
-            <p>Average sentiment score: <span th:text="${#numbers.formatDecimal(average_sentiment, 1, 'COMMA', 2, 'POINT')}"></span></p>
-            <p>Total entries analyzed: <span th:text="${total_analyses}"></span> </p>
+            <h3>Average sentiment score: <span th:text="${#numbers.formatDecimal(average_sentiment, 1, 'COMMA', 2, 'POINT')}"></span></h3>
+            <h3>Total entries analyzed: <span th:text="${total_analyses}"></span> </h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg">
+            <canvas id="chart" width="250" height="100"></canvas>
         </div>
     </div>
     <div class="row">
@@ -41,6 +64,22 @@
 
 <script src="webjars/jquery/3.3.1/jquery.min.js"></script>
 <script src="webjars/bootstrap/4.0.0-2/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js" integrity="sha256-XF29CBwU1MWLaGEnsELogU6Y6rcc5nCkhhx89nFMIDQ=" crossorigin="anonymous"></script>
+
+<script type="application/javascript">
+    var ctx = document.getElementById('chart').getContext('2d');
+    var chart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ["Positive", "Negative", "Neutral"],
+            datasets: [{
+                label: "Sentiment Distribution",
+                data: [20, 50, 37],
+                backgroundColor: ["rgb(255, 99, 132)","rgb(54, 162, 235)","rgb(255, 205, 86)"]
+            }]
+        }
+    })
+</script>
 </body>
 </html>
  
