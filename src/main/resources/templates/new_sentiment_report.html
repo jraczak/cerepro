@@ -25,6 +25,7 @@
 </head>
 <body>
 <div class="container">
+    <nav th:replace="fragments/header :: header"></nav>
     <div class="row">
         <div class="col-lg">
         <h1>New Sentiment Report</h1>
@@ -71,8 +72,9 @@
                                 th:text="${s}" th:value="${s}">
                         </option>
                     </select>
-                    <small id="categoriesHelp" class="form-text text-muted">Instant Match subcategories: How it works/General feedback<br>
-                                                                            Paying for contacts subcategories: Pricing, Budget</small>
+                    <small id="categoriesHelp" class="form-text text-muted">Instant Match subcategories: How it works, General feedback, Process of receiving quotes<br>
+                                                                            Paying for contacts subcategories: Pricing, Budget<br>
+                                                                            Quoting and payments subcategories: Quoting flow, Cost to quote, Getting feedback from customers</small>
                 </div>
                 <div class="form-group">
                     <input class="btn btn-primary" type="submit" value="Run report"/>

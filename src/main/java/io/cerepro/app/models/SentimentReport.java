@@ -1,14 +1,13 @@
 package io.cerepro.app.models;
 
+import com.google.cloud.language.v1.Sentiment;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "sentiment_reports")
@@ -50,6 +49,10 @@ public class SentimentReport {
 
     @Column(name = "feedback_subcategory")
     private String feedbackSubcategory;
+
+    @ElementCollection
+    @Column(name = "keywords")
+    private Map<String, Sentiment> keywords;
 
     @OneToMany(mappedBy = "sentimentReport", cascade = CascadeType.ALL, orphanRemoval = false)
     private Set<SentimentAnalysis> sentimentAnalyses;
@@ -178,5 +181,20 @@ public class SentimentReport {
             if (s.getSentiment().equals(sentiment)) count++;
         }
         return count;
+    }
+
+    public Map<String, Sentiment> getKeywords() {
+        return keywords;
+    }
+
+    public void setKeywords(Map<String, Sentiment> keywords) {
+        this.keywords = keywords;
+    }
+
+    public void addKeyword(String keyword, Sentiment sentiment) {
+        if (this.keywords == null) {
+            this.keywords = new HashMap<>();
+            this.keywords.put(keyword, sentiment);
+        } else this.keywords.put(keyword, sentiment);
     }
 }

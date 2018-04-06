@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>$Title$</title>
+    <link th:href="@{/webjars/bootstrap/4.0.0-2/css/bootstrap.min.css}" rel="stylesheet">
+    <link href="/webjars/bootstrap/4.0.0-2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <nav th:replace="fragments/header :: header"></nav>
+    <div class="row">
+        <div class="col-xl">
+            <h1>All Sentiment Reports</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xl">
+            <ul class="list-group">
+                <li th:each="s : ${sentiment_reports}" class="list-group-item"><a th:href="@{/sentiment_reports/{id}(id=${s.getId()})}"><span th:text="${s.name}"></span> </a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script src="webjars/jquery/3.3.1/jquery.min.js"></script>
+<script src="webjars/bootstrap/4.0.0-2/js/bootstrap.min.js"></script>
+</body>
+</html>
+ 

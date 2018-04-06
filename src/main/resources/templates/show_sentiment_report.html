@@ -8,15 +8,66 @@
 </head>
 <body>
 <div class="container">
+        <nav th:replace="fragments/header :: header"></nav>
     <div class="row">
-        <div class="col-lg">
+        <div class="col-xl" style="margin-bottom: 40px;">
             <h1><span th:text="${sentiment_report.getName()}"></span></h1>
-            <h3>Cases analyzed: <span th:text="${sentiment_report.getSentimentAnalyses().size()}"></span> </h3>
-            <h3>Overall sentiment: <span th:text="${sentiment_report.getAvgSentiment()}" th:style="${sentiment_report.getAvgSentiment() == 'negative'} ? 'color:red'"></span> (<span th:text="${sentiment_report.getDisplayAvgSentimentScore()}"></span>) </h3>
+            <small id="notes" class="text-muted"><span th:text="${sentiment_report.getNotes()}"></span> </small>
         </div>
-        <div class="col-lg">
-            <canvas id="chart" width="250" height="200"></canvas>
+    </div>
+    <div class="row">
+        <div class="col-lg-4">
+        <div class="card" style="width: 18rem;">
+            <div class="card-body">
+                <h3 class="card-title"><span th:text="${sentiment_report.getSentimentAnalyses().size()}"></span></h3>
+                <p class="card-text">cases analyzed</p>
+            </div>
         </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card" th:classappend="${sentiment_report.getAvgSentiment() == 'negative'}?'border-danger'" style="width: 18rem;">
+                <div class="card-body">
+                    <h3 class="card-title"><span th:text="${sentiment_report.getAvgSentiment()}"></span></h3>
+                    <p class="card-text">average sentiment</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card" th:classappend="${sentiment_report.getAvgSentiment() == 'negative'}?'border-danger'" style="width: 18rem;">
+                <div class="card-body">
+                    <h3 class="card-title"><span th:text="${sentiment_report.getDisplayAvgSentimentScore()}"></span></h3>
+                    <p class="card-text">average score</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="padding-top: 30px;">
+            <div class="col-xl-8">
+                <!--<canvas id="chart" width="250" height="150"></canvas>-->
+                <canvas id="barChart" width="250" height="150"></canvas>
+            </div>
+            <div class="col-xl-4">
+                <h4 style="margin-bottom: 10px;">Entity Sentiment Analysis</h4>
+                <small class="text-muted">Includes only entities mentioned > 5 times</small>
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th scope="col">Keyword</th>
+                        <th scope="col">Sentiment Score</th>
+                        <th scope="col">Magnitude</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="instance : ${sentiment_report.getKeywords()}" th:classappend="${instance.getValue().getScore() < 0}?'table-danger'">
+                        <td th:text="${instance.getKey()}"></td>
+                        <td th:text="${instance.getValue().getScore()}"></td>
+                        <td th:text="${instance.getValue().getMagnitude()}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -37,6 +88,23 @@
                 label: "Sentiment Distribution",
                 data: [positiveCount, neutralCount, negativeCount],
                 backgroundColor: ["rgb(54, 162, 235)","rgb(255, 205, 86)","rgb(255, 99, 132)"]
+            }]
+        }
+    })
+</script>
+<script th:inline="javascript" type="application/javascript">
+    var ctx = document.getElementById('barChart').getContext('2d');
+    var negativeCount = [[${sentiment_report.getSentimentCount("negative")}]];
+    var neutralCount = [[${sentiment_report.getSentimentCount("neutral")}]];
+    var positiveCount = [[${sentiment_report.getSentimentCount("positive")}]];
+    var chart = new Chart(ctx, {
+        type: 'horizontalBar',
+        data: {
+            labels: ["Positive", "Neutral", "Negative"],
+            datasets: [{
+                label: "Sentiment Distribution",
+                data: [positiveCount, neutralCount, negativeCount],
+                backgroundColor: ["rgb(54, 162, 235)","rgb(255, 205, 86)","rgb(218, 56, 73)"]
             }]
         }
     })

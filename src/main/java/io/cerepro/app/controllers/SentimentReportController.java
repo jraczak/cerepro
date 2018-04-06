@@ -27,6 +27,15 @@ public class SentimentReportController {
     @Autowired
     SentimentReportService sentimentReportService;
 
+    @RequestMapping(value = "/sentiment_reports", method = RequestMethod.GET)
+    public ModelAndView indexSentimentReports(ModelAndView modelAndView) {
+
+        modelAndView.setViewName("index_sentiment_reports");
+        modelAndView.addObject("sentiment_reports", sentimentReportService.findAll());
+
+        return modelAndView;
+    }
+
     @RequestMapping(value = "/new_sentiment_report", method = RequestMethod.GET)
     public ModelAndView newSentimentReport(ModelAndView modelAndView, SentimentReport sentimentReport) {
         modelAndView.setViewName("new_sentiment_report");
@@ -35,11 +44,17 @@ public class SentimentReportController {
         ArrayList<String> categories = new ArrayList<>();
         categories.add("Paying for contacts");
         categories.add("Instant Match");
+        categories.add("Quoting and payment");
         ArrayList<String> subcategories = new ArrayList<>();
         subcategories.add("Pricing");
         subcategories.add("Budget");
+        subcategories.add("General");
         subcategories.add("General feedback");
         subcategories.add("How it works");
+        subcategories.add("Process of receiving quotes");
+        subcategories.add("Quoting flow");
+        subcategories.add("Cost to quote");
+        subcategories.add("Getting feedback from customers");
 
         modelAndView.addObject("categories", categories);
         modelAndView.addObject("subcategories", subcategories);

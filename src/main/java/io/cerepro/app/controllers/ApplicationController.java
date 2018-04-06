@@ -43,7 +43,8 @@ public class ApplicationController {
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public ModelAndView welcome(ModelAndView modelAndView) {
 
-        analyzeBigQueryFeedback();
+        //TODO: Make sure this is safe to remove
+        //analyzeBigQueryFeedback();
 
         String text = "I'm very frustrated with all these changes. I used to make a lot of money and so that means " +
                 "so did you. But now I never get any jobs. The people who do contact me aren't serious about the projects. " +

@@ -41,6 +41,7 @@ public class GoogleCloudUtilities {
         QueryJobConfiguration queryJobConfiguration =
                 QueryJobConfiguration.newBuilder(
                         "SELECT\n" +
+                                "pf.feedback_id as feedback_id," +
                                 "pf.help_center_feedback_category as feedback_category,\n" +
                                 "pf.help_center_feedback_subcategory as feedback_subcategory,\n" +
                                 "pii.feedback as feedback,\n" +
@@ -85,9 +86,10 @@ public class GoogleCloudUtilities {
             SentimentAnalysis sentimentAnalysis;
             for (FieldValueList row : tableResult.iterateAll()) {
                 String feedback = row.get("feedback").getStringValue();
-                if (feedback.length() > 100) {
-                    System.out.printf("Sending feedback for analysis: %s%n", feedback);
-                    sentimentAnalysis = new SentimentAnalysis(feedback);
+                String id = row.get("feedback_id").getStringValue();
+                if (feedback.length() >= 105) {
+                    System.out.printf("Sending feedback " + id + " for analysis: %s%n", feedback);
+                    sentimentAnalysis = new SentimentAnalysis(id, feedback);
                     analyzeSentiment(sentimentReport, sentimentAnalysis);
                 } else logger.error("Feedback was shorter than 100 characters; skipping");
             }
@@ -95,7 +97,7 @@ public class GoogleCloudUtilities {
             e.printStackTrace();
         }
 
-        computeSentimentReport(sentimentReport);
+        computeSentimentReport(sentimentReport, languageServiceClient);
 
         return sentimentReport;
     }
@@ -145,13 +147,58 @@ public class GoogleCloudUtilities {
         //TODO Figure out how to actually use a conditional to determine if analysis was successful
     }
 
-    private SentimentReport computeSentimentReport(SentimentReport sentimentReport) {
+    //TODO: This needs to be moved to a background task so as not to hang the UI (or a stateful index that shows in progress)
+    private SentimentReport computeSentimentReport(SentimentReport sentimentReport,
+                                                   LanguageServiceClient languageServiceClient) {
         double avgSentiment = 0.0;
         for (SentimentAnalysis s : sentimentReport.getSentimentAnalyses()) {
             avgSentiment += s.getSentimentScore();
         }
         sentimentReport.setAvgSentimentScore(avgSentiment / (double) sentimentReport.getSentimentAnalyses().size());
         sentimentReport.convertAndSetSentiment(avgSentiment / (double) sentimentReport.getSentimentAnalyses().size());
+
+
+        // Aggregate all the text from this report's sentiment analyses into a single document text
+        StringBuilder stringBuilder = new StringBuilder();
+        for (SentimentAnalysis sa : sentimentReport.getSentimentAnalyses()) {
+            logger.info("Adding " + sa.getSourceText() + " to report document text");
+            stringBuilder.append(sa.getSourceText()).append("\n");
+        }
+        //TODO: Check the byte size before sending, bail out if it's too big
+        Document aggregateDocument = Document.newBuilder()
+                .setType(Document.Type.PLAIN_TEXT)
+                .setContent(stringBuilder.toString())
+                .build();
+        logger.info(String.valueOf(aggregateDocument.getSerializedSize()));
+        //TODO: Finish this if getSerializedSize is right
+        //if (aggregateDocument.getSerializedSize() >= 1000000)
+
+        // Analyze the aggregate document
+        logger.info("Sending document for analysis with document sentiment, entity extraction, and entity sentiment");
+        AnnotateTextRequest.Features features = AnnotateTextRequest.Features.newBuilder()
+                .setExtractDocumentSentiment(true)
+                .setExtractEntities(true)
+                .setExtractEntitySentiment(true)
+                .build();
+
+        AnnotateTextResponse response = languageServiceClient.annotateText(aggregateDocument,
+                features,
+                EncodingType.UTF8);
+
+        // Leverage the query results
+        //TODO: Figure out how to leverage salience
+        for (Entity e : response.getEntitiesList()) {
+            System.out.println(e.getName() +
+                    " mentioned " +
+                    e.getMentionsCount() +
+                    " times with sentiment of " +
+                    e.getSentiment().getScore());
+            if (e.getMentionsCount() > 5 && !e.getName().equals("Thumbtack")) {
+                System.out.printf("Keyword %s mentioned more than 5 times; adding to report\n", e.getName());
+                sentimentReport.addKeyword(e.getName(), e.getSentiment());
+            }
+        }
+
         sentimentReportService.saveSentimentReport(sentimentReport);
 
         return sentimentReport;

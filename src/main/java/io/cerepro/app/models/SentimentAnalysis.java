@@ -31,6 +31,9 @@ public class SentimentAnalysis {
     @Column(name = "is_analyzed")
     private boolean isAnalyzed;
 
+    @Column(name = "bigquery_feedback_id")
+    private String bigQueryFeedbackId;
+
     @Column(name = "created_at")
     @CreationTimestamp
     private Date createdAt;
@@ -45,6 +48,11 @@ public class SentimentAnalysis {
 
     public SentimentAnalysis(String sourceText) {
         this.sourceText = sourceText;
+    }
+
+    public SentimentAnalysis(String feedbackId, String text) {
+        this.bigQueryFeedbackId = feedbackId;
+        this.sourceText = text;
     }
 
     // Default obligatory empty constructor
@@ -141,5 +149,13 @@ public class SentimentAnalysis {
 
     public void setSentimentReport(SentimentReport sentimentReport) {
         this.sentimentReport = sentimentReport;
+    }
+
+    public String getBigQueryFeedbackId() {
+        return bigQueryFeedbackId;
+    }
+
+    public void setBigQueryFeedbackId(String bigQueryFeedbackId) {
+        this.bigQueryFeedbackId = bigQueryFeedbackId;
     }
 }

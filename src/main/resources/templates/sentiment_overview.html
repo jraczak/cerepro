@@ -8,22 +8,8 @@
 </head>
 <body>
 
-
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-    <a class="navbar-brand" href="/">CerePro</a>
-
-    <div class="collapse navbar-collapse">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-                <a class="nav-link" href="/sentiment">Sentiment Overview</a>
-            </li>
-        </ul>
-    </div>
-    </div>
-</nav>
-
 <div class="container">
+    <nav th:replace="fragments/header :: header"></nav>
     <div class="row">
         <div class="col-lg">
             <br>
@@ -71,11 +57,11 @@
     var chart = new Chart(ctx, {
         type: 'pie',
         data: {
-            labels: ["Positive", "Negative", "Neutral"],
+            labels: ["Positive", "Neutral", "Negative"],
             datasets: [{
                 label: "Sentiment Distribution",
                 data: [20, 50, 37],
-                backgroundColor: ["rgb(255, 99, 132)","rgb(54, 162, 235)","rgb(255, 205, 86)"]
+                backgroundColor: ["rgb(54, 162, 235)","rgb(255, 205, 86)","rgb(255, 99, 132)"]
             }]
         }
     })

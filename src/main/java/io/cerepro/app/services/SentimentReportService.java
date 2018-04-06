@@ -5,6 +5,7 @@ import io.cerepro.app.models.SentimentReport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -24,5 +25,9 @@ public class SentimentReportService {
     //TODO Handle nulls
     public SentimentReport findById(Long id) {
         return sentimentReportRepository.findById(id).get();
+    }
+
+    public Iterable<SentimentReport> findAll() {
+        return sentimentReportRepository.findAll();
     }
 }
