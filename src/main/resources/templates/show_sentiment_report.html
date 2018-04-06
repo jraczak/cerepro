@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Sentiment Report</title>
+    <link th:href="@{/webjars/bootstrap/4.0.0-2/css/bootstrap.min.css}" rel="stylesheet">
+    <link href="/webjars/bootstrap/4.0.0-2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-lg">
+            <h1><span th:text="${sentiment_report.getName()}"></span></h1>
+            <h3>Cases analyzed: <span th:text="${sentiment_report.getSentimentAnalyses().size()}"></span> </h3>
+            <h3>Overall sentiment: <span th:text="${sentiment_report.getAvgSentiment()}" th:style="${sentiment_report.getAvgSentiment() == 'negative'} ? 'color:red'"></span> (<span th:text="${sentiment_report.getDisplayAvgSentimentScore()}"></span>) </h3>
+        </div>
+        <div class="col-lg">
+            <canvas id="chart" width="250" height="200"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="webjars/jquery/3.3.1/jquery.min.js"></script>
+<script src="webjars/bootstrap/4.0.0-2/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js" integrity="sha256-XF29CBwU1MWLaGEnsELogU6Y6rcc5nCkhhx89nFMIDQ=" crossorigin="anonymous"></script>
+
+<script th:inline="javascript" type="application/javascript">
+    var ctx = document.getElementById('chart').getContext('2d');
+    var negativeCount = [[${sentiment_report.getSentimentCount("negative")}]];
+    var neutralCount = [[${sentiment_report.getSentimentCount("neutral")}]];
+    var positiveCount = [[${sentiment_report.getSentimentCount("positive")}]];
+    var chart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ["Positive", "Neutral", "Negative"],
+            datasets: [{
+                label: "Sentiment Distribution",
+                data: [positiveCount, neutralCount, negativeCount],
+                backgroundColor: ["rgb(54, 162, 235)","rgb(255, 205, 86)","rgb(255, 99, 132)"]
+            }]
+        }
+    })
+</script>
+</body>
+</html>
+ 

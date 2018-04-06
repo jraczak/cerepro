@@ -185,6 +185,7 @@ public class ApplicationController {
     //    return false;
     //}
 
+    //TODO: Move this to a utility class to be shared across the app
     private void analyzeSentiment(SentimentAnalysis sentimentAnalysis) {
         logger.info("In analyzeSentiment");
         languageServiceClient = new AppApplication().getLanguageServiceClient();

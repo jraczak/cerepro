@@ -39,6 +39,10 @@ public class SentimentAnalysis {
     @UpdateTimestamp
     private Date updatedAt;
 
+    @ManyToOne
+    @JoinColumn(name = "sentiment_report_id")
+    private SentimentReport sentimentReport;
+
     public SentimentAnalysis(String sourceText) {
         this.sourceText = sourceText;
     }
@@ -129,5 +133,13 @@ public class SentimentAnalysis {
 
     public void setSentimentMagnitude(double sentimentMagnitude) {
         this.sentimentMagnitude = sentimentMagnitude;
+    }
+
+    public SentimentReport getSentimentReport() {
+        return sentimentReport;
+    }
+
+    public void setSentimentReport(SentimentReport sentimentReport) {
+        this.sentimentReport = sentimentReport;
     }
 }
