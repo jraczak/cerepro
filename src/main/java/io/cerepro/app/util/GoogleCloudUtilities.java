@@ -5,8 +5,10 @@ import com.google.cloud.language.v1.*;
 import io.cerepro.app.AppApplication;
 import io.cerepro.app.models.SentimentAnalysis;
 import io.cerepro.app.models.SentimentReport;
+import io.cerepro.app.models.SupportCaseReport;
 import io.cerepro.app.services.SentimentAnalysisService;
 import io.cerepro.app.services.SentimentReportService;
+import io.cerepro.app.services.SupportCaseReportService;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,10 +25,12 @@ public class GoogleCloudUtilities {
     private SentimentAnalysisService sentimentAnalysisService;
     @Autowired
     private SentimentReportService sentimentReportService;
+    @Autowired
+    private SupportCaseReportService supportCaseReportService;
 
     private LanguageServiceClient languageServiceClient;
 
-    // Method to query the data
+    // Method to query the Help Center Suggestion Box data
     public SentimentReport fetchBigQueryFeedbackData(SentimentReport sentimentReport,
                                            String feedbackCategory,
                                            String feedbackSubcategory,
@@ -202,5 +206,111 @@ public class GoogleCloudUtilities {
         sentimentReportService.saveSentimentReport(sentimentReport);
 
         return sentimentReport;
+    }
+
+    // Method to query the Help Center Suggestion Box data
+    //TODO: Allow querying for IM ON/OFF
+    public SupportCaseReport fetchBigQuerySupportCaseData(SupportCaseReport supportCaseReport,
+                                                       String caseCategory,
+                                                       String caseSubcategory,
+                                                       String startDate,
+                                                       String endDate,
+                                                       int limit) {
+
+        logger.info("In fetchBigQuerySupportCaseData");
+        BigQuery bigQuery = BigQueryOptions.newBuilder().setProjectId("tt-dp-prod").build().getService();
+        System.out.println("BigQuery is using project: " + bigQuery.getOptions().getProjectId());
+
+        QueryJobConfiguration queryJobConfiguration =
+                QueryJobConfiguration.newBuilder(
+                        "SELECT\n" +
+                                "c.case_number as case_number,\n" +
+                                "c.case_category as case_category,\n" +
+                                "c.case_subcategory as case_subcategory,\n" +
+                                "pii.notes__c as notes,\n" +
+                                "c.created_time as created_time\n" +
+                                "FROM\n" +
+                                "`ops.cases` c\n" +
+                                "INNER JOIN\n" +
+                                "`ops_pii.categorization_notes` pii\n" +
+                                "ON\n" +
+                                "pii.case_number = c.case_number\n" +
+                                "WHERE\n" +
+                                "c.case_category = '" + caseCategory + "'" +
+                                "AND\n" +
+                                "c.case_subcategory = '" + caseSubcategory + "'" +
+                                "AND\n" +
+                                "c.created_time BETWEEN '" + startDate + "' AND '" + endDate +"'" +
+                                "ORDER BY\n" +
+                                "c.created_time DESC\n" +
+                                "LIMIT\n" +
+                                limit
+                ).setUseLegacySql(false).build();
+
+        JobId jobId = JobId.of(UUID.randomUUID().toString());
+        Job queryJob = bigQuery.create(JobInfo.newBuilder(queryJobConfiguration).setJobId(jobId).build());
+
+        try {
+            queryJob = queryJob.waitFor();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        if (queryJob == null) {
+            logger.error("Query job no longer exists");
+        } else if (queryJob.getStatus().getError() != null) {
+            logger.error("There was some other error with the query");
+        }
+
+        QueryResponse queryResponse = bigQuery.getQueryResults(jobId);
+        // Create one big document for entity extraction
+        try {
+            supportCaseReportService.saveSupportCaseReport(supportCaseReport);
+            TableResult tableResult = queryJob.getQueryResults();
+
+            StringBuilder builder = new StringBuilder();
+            for (FieldValueList row : tableResult.iterateAll()) {
+                String notes = row.get("notes").getStringValue();
+                if (notes.length() >= 30) {
+                    System.out.printf("Adding case notes to document: %s%n", notes);
+                    builder.append(notes);
+
+                } else logger.error("Case notes were shorter than 30 characters; skipping");
+            }
+            Document document = Document.newBuilder().setType(Document.Type.PLAIN_TEXT).setContent(builder.toString()).build();
+            computeSupportCaseReport(supportCaseReport, document);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return supportCaseReport;
+    }
+
+    private SupportCaseReport computeSupportCaseReport(SupportCaseReport supportCaseReport, Document document) {
+
+        languageServiceClient = new AppApplication().getLanguageServiceClient();
+
+        // Analyze the aggregate document
+        logger.info("Sending support case document for analysis with entity extraction");
+        AnnotateTextRequest.Features features = AnnotateTextRequest.Features.newBuilder()
+                .setExtractEntities(true)
+                .build();
+
+        AnnotateTextResponse response = languageServiceClient.annotateText(document,
+                features,
+                EncodingType.UTF8);
+
+        // Leverage the query results
+        for (Entity e : response.getEntitiesList()) {
+            System.out.println(e.getName() +
+                    " mentioned " +
+                    e.getMentionsCount());
+            if (e.getMentionsCount() > 5 && !e.getName().equals("Thumbtack")) {
+                System.out.printf("Keyword %s mentioned more than 5 times; adding to report\n", e.getName());
+                supportCaseReport.addEntity(e);
+            }
+        }
+        supportCaseReportService.saveSupportCaseReport(supportCaseReport);
+        return supportCaseReport;
     }
 }

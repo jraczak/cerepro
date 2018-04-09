@@ -136,6 +136,7 @@ public class SentimentReport {
         return startDate;
     }
 
+    //TODO: Deal with the parse exception
     public void setStartDate(String startDate) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         this.startDate = dateFormat.parse(startDate);

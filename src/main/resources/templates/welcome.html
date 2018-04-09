@@ -8,11 +8,55 @@
 </head>
 <body>
 
-<div class="container-fluid">
-    <h1><span th:text="${greeting}"></span></h1>
+<nav th:replace="fragments/header :: header"></nav>
+<div class="container">
 
-    <h2>User feedback:</h2>
-    <p><span th:text="${text}"></span></p>
+
+    <div class="row">
+        <div class="col-lg">
+            <div class="jumbotron">
+                <h1 class="display-4"><span th:text="${greeting}"></span></h1>
+                <p class="lead">Pardon the appearance while CerePro is still under construction. Be aware that it lacks statefulness, so when the UI hangs,
+                    just be patient - your results are coming. Follow instructions carefully - no error handling either ;)</p>
+                <hr class="my-4">
+                <h2 class="lead" style="margin-bottom: 20px;"><b>So, what exactly does CerePro do?</b></h2>
+                <p class="">CerePro hooks into Help Center Suggestion Box feedback submissions and analyzes the text to
+                answer questions like: "How do Pros feel about the cost of PFC/PPC/CC? Three processes are used for this.</p>
+                <div class="row">
+                <div class="col-lg-4">
+                    <div class="card" style="width: 18rem; margin-bottom: 30px;">
+                    <div class="card-body">
+                        <h5 class="card-title">Sentiment Analysis</h5>
+                        <p class="card-text">Determines the sentiment of a feedback submission and computes its magnitude. Magnitude is
+                        how much emotion is present in the text.</p>
+                    </div>
+                </div>
+                </div>
+                    <div class="col-lg-4">
+                <div class="card" style="width: 18rem; margin-bottom: 30px;">
+                    <div class="card-body">
+                        <h5 class="card-title">Entity Extraction</h5>
+                        <p class="card-text">Determines what people are actually talking about in their submission and assigns
+                        relevancy based on the structure of the text.</p>
+                    </div>
+                </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card" style="width: 18rem; margin-bottom: 30px;">
+                            <div class="card-body">
+                                <h5 class="card-title">Entity Sentiment Analysis</h5>
+                                <p class="card-text">Calculates the sentiment relative to a mentioned entity. This helps us understand differing
+                                sentiment between mentions within a single submission.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="lead">
+                    <a class="btn btn-primary btn-lg" href="/new_sentiment_report" role="button">Create a new report</a>
+                </p>
+            </div>
+        </div>
+    </div>
 
 </div>
 <script src="webjars/jquery/3.3.1/jquery.min.js"></script>

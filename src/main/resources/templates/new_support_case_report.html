@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>New Support Case Report</title>
+    <link th:href="@{/webjars/bootstrap/4.0.0-2/css/bootstrap.min.css}" rel="stylesheet">
+    <link href="/webjars/bootstrap/4.0.0-2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/webjars/bootstrap-datepicker/1.0.1/css/datepicker.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
+
+    <!--TODO: Get the bootstrap date picker working -->
+    <script src="webjars/bootstrap/4.0.0-2/js/bootstrap.min.js"></script>
+    <script src="webjars/jquery/3.3.1/jquery.min.js"></script>
+    <script src="webjars/bootstrap-datepicker/1.0.1/js/bootstrap-datepicker.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <script>
+        $(function() {
+            $("#startDatePicker").datepicker({dateFormat: "yy-mm-dd"});
+            $("#endDatePicker").datepicker({dateFormat: "yy-mm-dd"});
+        });
+    </script>
+</head>
+<body>
+<nav th:replace="fragments/header :: header"></nav>
+<div class="container">
+<div class="row">
+    <div class="col-lg">
+        <h1>New Support Case Report</h1>
+        <p>Use this form to run keyword/entity extraction on support cases matching the criteria defined below.<br></p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg">
+        <form class="form" action="#" th:action="@{/support_case_reports/create}" th:object="${supportCaseReport}" method="post">
+            <div class="form-group">
+                <label for="name" th:for="*{name}">Report name (optional)</label>
+                <input type="text" class="form-control" th:field="*{name}">
+                <small id="nameHelp" class="form-text text-muted">Helpful if you'd like to easily identify the report later</small>
+            </div>
+
+            <div class="form-group">
+                <label for="notes" th:for="*{notes}">Report purpose (optional)</label>
+                <input type="text" class="form-control" th:field="*{notes}">
+                <small id="notesHelp" class="form-text text-muted">Simple notes about the research question being explored</small>
+            </div>
+            <div class="form-group">
+                <label for="startDate" th:for="*{startDate}">Earliest support case date</label>
+                <input class="form-control" type="text" th:field="*{startDate}" id="startDatePicker">
+            </div>
+            <div class="form-group">
+                <label for="endDate" th:for="*{endDate}">Latest support case date</label>
+                <input class="form-control" type="text" th:field="*{endDate}" id="endDatePicker">
+            </div>
+            <div class="form-group">
+                <label for="feedbackCategory" th:for="*{caseCategory}">Case category</label>
+                <select th:field="*{caseCategory}" class="form-control">
+                    <option selected value="">Select a category</option>
+                    <option th:each="c : ${categories}"
+                            th:text="${c}" th:value="${c}">
+                    </option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="feedbackSubcategory" th:for="*{caseSubcategory}">Case subcategory</label>
+                <select th:field="*{caseSubcategory}" class="form-control">
+                    <option selected value="">Select a category</option>
+                    <option th:each="s : ${subcategories}"
+                            th:text="${s}" th:value="${s}">
+                    </option>
+                </select>
+            </div>
+            <div class="form-group">
+                <input class="btn btn-primary" type="submit" value="Run report"/>
+            </div>
+        </form>
+    </div>
+</div>
+</div>
+
+</body>
+</html>
+ 

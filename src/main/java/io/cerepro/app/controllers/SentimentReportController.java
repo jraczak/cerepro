@@ -12,7 +12,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
 @Controller
@@ -20,7 +19,6 @@ public class SentimentReportController {
 
     private final Logger logger = Logger.getLogger(this.getClass().getSimpleName());
 
-    //TODO: Autowire Sentiment Analysis Report Service
     @Autowired
     GoogleCloudUtilities googleCloudUtilities;
 
@@ -71,8 +69,6 @@ public class SentimentReportController {
 
         SentimentReport sentimentReport = sentimentReportService.findById(id);
         modelAndView.addObject("sentiment_report", sentimentReport);
-
-        //TODO find report by id and add as object to view
 
         return modelAndView;
     }

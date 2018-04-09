@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>$Title$</title>
+    <link th:href="@{/webjars/bootstrap/4.0.0-2/css/bootstrap.min.css}" rel="stylesheet">
+    <link href="/webjars/bootstrap/4.0.0-2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<h1>Woo, you found <span th:text="${support_case_report.getName()}"></span>!</h1>
+<p><span th:text="${support_case_report.getEntities().size()}"></span> keywords logged</p>
+
+<ul>
+    <li th:each="entity : ${support_case_report.getEntities()}"><span th:text="${entity.getName()}"></span> - <span th:text="${entity.getMentionsCount()}"> mentions</span> </li>
+</ul>
+
+<script src="webjars/jquery/3.3.1/jquery.min.js"></script>
+<script src="webjars/bootstrap/4.0.0-2/js/bootstrap.min.js"></script>
+</body>
+</html>
+ 

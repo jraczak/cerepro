@@ -7,8 +7,9 @@
     <link href="/webjars/bootstrap/4.0.0-2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+<nav th:replace="fragments/header :: header"></nav>
 <div class="container">
-        <nav th:replace="fragments/header :: header"></nav>
+
     <div class="row">
         <div class="col-xl" style="margin-bottom: 40px;">
             <h1><span th:text="${sentiment_report.getName()}"></span></h1>
