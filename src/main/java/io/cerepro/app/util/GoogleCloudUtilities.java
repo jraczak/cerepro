@@ -2,6 +2,10 @@ package io.cerepro.app.util;
 
 import com.google.cloud.bigquery.*;
 import com.google.cloud.language.v1.*;
+import com.google.gson.*;
+import com.monkeylearn.MonkeyLearn;
+import com.monkeylearn.MonkeyLearnException;
+import com.monkeylearn.MonkeyLearnResponse;
 import io.cerepro.app.AppApplication;
 import io.cerepro.app.models.SentimentAnalysis;
 import io.cerepro.app.models.SentimentReport;
@@ -9,10 +13,13 @@ import io.cerepro.app.models.SupportCaseReport;
 import io.cerepro.app.services.SentimentAnalysisService;
 import io.cerepro.app.services.SentimentReportService;
 import io.cerepro.app.services.SupportCaseReportService;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Array;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -29,6 +36,8 @@ public class GoogleCloudUtilities {
     private SupportCaseReportService supportCaseReportService;
 
     private LanguageServiceClient languageServiceClient;
+
+    private MonkeyLearn monkeyLearn;
 
     // Method to query the Help Center Suggestion Box data
     public SentimentReport fetchBigQueryFeedbackData(SentimentReport sentimentReport,
@@ -277,12 +286,70 @@ public class GoogleCloudUtilities {
 
                 } else logger.error("Case notes were shorter than 30 characters; skipping");
             }
-            Document document = Document.newBuilder().setType(Document.Type.PLAIN_TEXT).setContent(builder.toString()).build();
-            computeSupportCaseReport(supportCaseReport, document);
+            //TODO: Replace for Google version
+            //Document document = Document.newBuilder().setType(Document.Type.PLAIN_TEXT).setContent(builder.toString()).build();
+            //computeSupportCaseReport(supportCaseReport, document);
+            computeMonkeyLearnSupportCaseReport(supportCaseReport, builder.toString());
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
+        return supportCaseReport;
+    }
+
+    // For MonkeyLearn version
+    private SupportCaseReport computeMonkeyLearnSupportCaseReport(SupportCaseReport supportCaseReport, String texts) {
+        monkeyLearn = new MonkeyLearn("3a1676bd86dc12eb834f90d160522b799ade3d18");
+        String moduleId = "ex_EjosnyKK";
+        String[] text = {texts};
+        try {
+            MonkeyLearnResponse response = monkeyLearn.extractors.extract(moduleId, text);
+            JSONArray responseArray = response.arrayResult;
+            JSONArray array2 = (JSONArray) responseArray.get(0);
+            JSONObject object = (JSONObject) array2.get(0);
+
+
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            JsonParser jsonParser = new JsonParser();
+
+            JsonElement jsonElement = jsonParser.parse(response.arrayResult.toJSONString());
+            JsonArray jsonArray = jsonElement.getAsJsonArray();
+            JsonArray jsonArray2 = jsonArray.get(0).getAsJsonArray();
+            for (JsonElement e : jsonArray2) {
+                JsonObject jsonObject = e.getAsJsonObject();
+                JsonArray entityArray = (JsonArray) jsonObject.get("entities"); // contains parsed value, count, type, etc
+                JsonObject summaryObject = (JsonObject) entityArray.get(0);
+                JsonObject samplesObject = (JsonObject) entityArray.get(1);
+
+                String keyword = summaryObject.get("parsed_value").toString();
+                String count = summaryObject.get("count").toString();
+                String relevance = summaryObject.get("relevance").toString();
+                System.out.println("Keyword " + keyword + " appeared " + count + " times with a relevance of  " + relevance);
+
+                for (JsonElement el : samplesObject.get("parsed_value").getAsJsonArray()) {
+                    System.out.println(el.toString());
+                }
+
+                //String objectString = gson.toJson(jsonObject);
+                //String entityString = gson.toJson(entityArray);
+                //String secondValues = gson.toJson(samplesObject);
+                //System.out.println(secondValues);
+                //System.out.println(objectString);
+            }
+
+
+            //JsonElement jse = jsonParser.parse(object.toJSONString());
+            //String prettyJsonString = gson.toJson(jse);
+            //System.out.println(prettyJsonString);
+            //System.out.println(object.get("entities"));
+
+
+            //JSONArray responseArray = monkeyLearnResponse.arrayResult;
+            //        JSONArray array2 = (JSONArray) responseArray.get(0);
+            //        JSONObject object = (JSONObject) array2.get(0);
+        } catch (MonkeyLearnException e) {
+            e.printStackTrace();
+        }
         return supportCaseReport;
     }
 
