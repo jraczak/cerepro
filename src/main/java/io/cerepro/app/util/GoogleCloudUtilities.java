@@ -7,6 +7,7 @@ import com.monkeylearn.MonkeyLearn;
 import com.monkeylearn.MonkeyLearnException;
 import com.monkeylearn.MonkeyLearnResponse;
 import io.cerepro.app.AppApplication;
+import io.cerepro.app.models.MonkeyLearnKeyword;
 import io.cerepro.app.models.SentimentAnalysis;
 import io.cerepro.app.models.SentimentReport;
 import io.cerepro.app.models.SupportCaseReport;
@@ -20,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -316,40 +319,37 @@ public class GoogleCloudUtilities {
             JsonArray jsonArray = jsonElement.getAsJsonArray();
             JsonArray jsonArray2 = jsonArray.get(0).getAsJsonArray();
             for (JsonElement e : jsonArray2) {
+                List<String> keywordSamples = new ArrayList<>();
                 JsonObject jsonObject = e.getAsJsonObject();
                 JsonArray entityArray = (JsonArray) jsonObject.get("entities"); // contains parsed value, count, type, etc
                 JsonObject summaryObject = (JsonObject) entityArray.get(0);
                 JsonObject samplesObject = (JsonObject) entityArray.get(1);
 
-                String keyword = summaryObject.get("parsed_value").toString();
-                String count = summaryObject.get("count").toString();
-                String relevance = summaryObject.get("relevance").toString();
-                System.out.println("Keyword " + keyword + " appeared " + count + " times with a relevance of  " + relevance);
+                if (!summaryObject.get("parsed_value").toString().equals("Thumbtack")) {
+                    String keyword = summaryObject.get("parsed_value").toString();
+                    String count = summaryObject.get("count").toString();
+                    String relevance = summaryObject.get("relevance").toString();
+                    System.out.println("Keyword " + keyword + " appeared " + count + " times with a relevance of  " + relevance);
 
-                for (JsonElement el : samplesObject.get("parsed_value").getAsJsonArray()) {
-                    System.out.println(el.toString());
+                    for (JsonElement el : samplesObject.get("parsed_value").getAsJsonArray()) {
+                        System.out.println(el.toString());
+                        keywordSamples.add(el.toString());
+                    }
+
+                    MonkeyLearnKeyword monkeyLearnKeyword = new MonkeyLearnKeyword(keyword,
+                            summaryObject.get("count").getAsInt(),
+                            summaryObject.get("relevance").getAsDouble(),
+                            keywordSamples);
+                    supportCaseReport.addMonkeyLearnKeyword(monkeyLearnKeyword);
                 }
 
-                //String objectString = gson.toJson(jsonObject);
-                //String entityString = gson.toJson(entityArray);
-                //String secondValues = gson.toJson(samplesObject);
-                //System.out.println(secondValues);
-                //System.out.println(objectString);
+
             }
 
-
-            //JsonElement jse = jsonParser.parse(object.toJSONString());
-            //String prettyJsonString = gson.toJson(jse);
-            //System.out.println(prettyJsonString);
-            //System.out.println(object.get("entities"));
-
-
-            //JSONArray responseArray = monkeyLearnResponse.arrayResult;
-            //        JSONArray array2 = (JSONArray) responseArray.get(0);
-            //        JSONObject object = (JSONObject) array2.get(0);
         } catch (MonkeyLearnException e) {
             e.printStackTrace();
         }
+        supportCaseReportService.saveSupportCaseReport(supportCaseReport);
         return supportCaseReport;
     }
 

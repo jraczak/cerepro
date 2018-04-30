@@ -6,9 +6,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Table(name = "support_case_reports")
@@ -48,6 +46,13 @@ public class SupportCaseReport {
     @ElementCollection
     @Column(name = "entities")
     private List<com.google.cloud.language.v1.Entity> entities;
+
+    @OneToMany(mappedBy = "supportCaseReport", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<MonkeyLearnKeyword> monkeyLearnKeywords;
+
+    public SupportCaseReport() {
+        this.monkeyLearnKeywords = new HashSet<>();
+    }
 
     public Long getId() {
         return id;
@@ -137,5 +142,17 @@ public class SupportCaseReport {
             this.entities = new ArrayList<>();
             this.entities.add(entity);
         } else this.entities.add(entity);
+    }
+
+    public Set<MonkeyLearnKeyword> getMonkeyLearnKeywords() {
+        return monkeyLearnKeywords;
+    }
+
+    public void setMonkeyLearnKeywords(Set<MonkeyLearnKeyword> monkeyLearnKeywords) {
+        this.monkeyLearnKeywords = monkeyLearnKeywords;
+    }
+
+    public void addMonkeyLearnKeyword(MonkeyLearnKeyword monkeyLearnKeyword) {
+        this.monkeyLearnKeywords.add(monkeyLearnKeyword);
     }
 }
