@@ -27,8 +27,12 @@ public class MonkeyLearnKeyword {
     @Column(name = "word")
     private String word;
 
+    //TODO MonkeyLearnKeywordSamples needs to have database column size increased in prod
+    /**
+     * This is related to an issue where the samples were throwing errors about varchar)255) when being saved
+     */
     @ElementCollection
-    @Column(name = "samples")
+    @Column(name = "samples", length = 2000)
     private List<String> samples;
 
     @Column(name = "count")
@@ -106,5 +110,13 @@ public class MonkeyLearnKeyword {
 
     public void setRelevance(double relevance) {
         this.relevance = relevance;
+    }
+
+    public SupportCaseReport getSupportCaseReport() {
+        return supportCaseReport;
+    }
+
+    public void setSupportCaseReport(SupportCaseReport supportCaseReport) {
+        this.supportCaseReport = supportCaseReport;
     }
 }

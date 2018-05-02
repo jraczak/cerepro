@@ -340,6 +340,7 @@ public class GoogleCloudUtilities {
                             summaryObject.get("count").getAsInt(),
                             summaryObject.get("relevance").getAsDouble(),
                             keywordSamples);
+                    monkeyLearnKeyword.setSupportCaseReport(supportCaseReport);
                     supportCaseReport.addMonkeyLearnKeyword(monkeyLearnKeyword);
                 }
 
