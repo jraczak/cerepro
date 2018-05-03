@@ -88,7 +88,7 @@ public class SentimentReportController {
                 sentimentReport.getFeedbackSubcategory(),
                 dateFormat.format(sentimentReport.getStartDate()),
                 dateFormat.format(sentimentReport.getEndDate()),
-                100);
+                2000);
         logger.info("Sentiment report is " + sentimentReport.toString());
 
         //TODO: Redirect to the report view

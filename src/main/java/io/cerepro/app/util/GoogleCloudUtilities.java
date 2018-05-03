@@ -1,8 +1,10 @@
 package io.cerepro.app.util;
 
+import com.google.cloud.ServiceOptions;
 import com.google.cloud.bigquery.*;
 import com.google.cloud.language.v1.*;
 import com.google.gson.*;
+import com.monkeylearn.ExtraParam;
 import com.monkeylearn.MonkeyLearn;
 import com.monkeylearn.MonkeyLearnException;
 import com.monkeylearn.MonkeyLearnResponse;
@@ -20,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,33 +55,63 @@ public class GoogleCloudUtilities {
 
         logger.info("In fetchBigQueryFeedbackData");
         BigQuery bigQuery = BigQueryOptions.newBuilder().setProjectId("tt-dp-prod").build().getService();
+        QueryJobConfiguration queryJobConfiguration;
         System.out.println("BigQuery is using project: " + bigQuery.getOptions().getProjectId());
 
-        QueryJobConfiguration queryJobConfiguration =
-                QueryJobConfiguration.newBuilder(
-                        "SELECT\n" +
-                                "pf.feedback_id as feedback_id," +
-                                "pf.help_center_feedback_category as feedback_category,\n" +
-                                "pf.help_center_feedback_subcategory as feedback_subcategory,\n" +
-                                "pii.feedback as feedback,\n" +
-                                "pf.created_time as created_time\n" +
-                                "FROM\n" +
-                                "`ops.product_feedback` pf\n" +
-                                "JOIN\n" +
-                                "`ops_pii.product_feedback` pii\n" +
-                                "ON\n" +
-                                "pii.feedback_id = pf.feedback_id\n" +
-                                "WHERE\n" +
-                                "pf.help_center_feedback_category = '" + feedbackCategory + "'" +
-                                "AND\n" +
-                                "pf.help_center_feedback_subcategory = '" + feedbackSubcategory + "'" +
-                                "AND\n" +
-                                "created_time BETWEEN '" + startDate + "' AND '" + endDate +"'" +
-                                "ORDER BY\n" +
-                                "created_time DESC\n" +
-                                "LIMIT\n" +
-                                limit
-                ).setUseLegacySql(false).build();
+        if (!feedbackSubcategory.equals("")) {
+
+            queryJobConfiguration =
+                    QueryJobConfiguration.newBuilder(
+                            "SELECT\n" +
+                                    "pf.feedback_id as feedback_id," +
+                                    "pf.help_center_feedback_category as feedback_category,\n" +
+                                    "pf.help_center_feedback_subcategory as feedback_subcategory,\n" +
+                                    "pii.feedback as feedback,\n" +
+                                    "pf.created_time as created_time\n" +
+                                    "FROM\n" +
+                                    "`ops.product_feedback` pf\n" +
+                                    "JOIN\n" +
+                                    "`ops_pii.product_feedback` pii\n" +
+                                    "ON\n" +
+                                    "pii.feedback_id = pf.feedback_id\n" +
+                                    "WHERE\n" +
+                                    "pf.help_center_feedback_category = '" + feedbackCategory + "'" +
+                                    "AND\n" +
+                                    "pf.help_center_feedback_subcategory = '" + feedbackSubcategory + "'" +
+                                    "AND\n" +
+                                    "created_time BETWEEN '" + startDate + "' AND '" + endDate + "'" +
+                                    "ORDER BY\n" +
+                                    "created_time DESC\n" +
+                                    "LIMIT\n" +
+                                    limit
+                    ).setUseLegacySql(false).build();
+            logger.info(queryJobConfiguration.getQuery());
+        } else {
+            queryJobConfiguration =
+                    QueryJobConfiguration.newBuilder(
+                            "SELECT\n" +
+                                    "pf.feedback_id as feedback_id," +
+                                    "pf.help_center_feedback_category as feedback_category,\n" +
+                                    "pf.help_center_feedback_subcategory as feedback_subcategory,\n" +
+                                    "pii.feedback as feedback,\n" +
+                                    "pf.created_time as created_time\n" +
+                                    "FROM\n" +
+                                    "`ops.product_feedback` pf\n" +
+                                    "JOIN\n" +
+                                    "`ops_pii.product_feedback` pii\n" +
+                                    "ON\n" +
+                                    "pii.feedback_id = pf.feedback_id\n" +
+                                    "WHERE\n" +
+                                    "pf.help_center_feedback_category = '" + feedbackCategory + "'" +
+                                    "AND\n" +
+                                    "created_time BETWEEN '" + startDate + "' AND '" + endDate + "'" +
+                                    "ORDER BY\n" +
+                                    "created_time DESC\n" +
+                                    "LIMIT\n" +
+                                    limit
+                    ).setUseLegacySql(false).build();
+            logger.info(queryJobConfiguration.getQuery());
+        }
 
         JobId jobId = JobId.of(UUID.randomUUID().toString());
         Job queryJob = bigQuery.create(JobInfo.newBuilder(queryJobConfiguration).setJobId(jobId).build());
@@ -122,7 +155,12 @@ public class GoogleCloudUtilities {
 
     private void analyzeSentiment(SentimentReport sentimentReport, SentimentAnalysis sentimentAnalysis) {
         logger.info("In analyzeSentiment utility");
-        languageServiceClient = new AppApplication().getLanguageServiceClient();
+        logger.info("Default project: " + ServiceOptions.getDefaultProjectId());
+        try {
+            languageServiceClient = LanguageServiceClient.create();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         Entity entity;
 
@@ -232,32 +270,63 @@ public class GoogleCloudUtilities {
         logger.info("In fetchBigQuerySupportCaseData");
         BigQuery bigQuery = BigQueryOptions.newBuilder().setProjectId("tt-dp-prod").build().getService();
         System.out.println("BigQuery is using project: " + bigQuery.getOptions().getProjectId());
+        QueryJobConfiguration queryJobConfiguration;
 
-        QueryJobConfiguration queryJobConfiguration =
-                QueryJobConfiguration.newBuilder(
-                        "SELECT\n" +
-                                "c.case_number as case_number,\n" +
-                                "c.case_category as case_category,\n" +
-                                "c.case_subcategory as case_subcategory,\n" +
-                                "pii.notes__c as notes,\n" +
-                                "c.created_time as created_time\n" +
-                                "FROM\n" +
-                                "`ops.cases` c\n" +
-                                "INNER JOIN\n" +
-                                "`ops_pii.categorization_notes` pii\n" +
-                                "ON\n" +
-                                "pii.case_number = c.case_number\n" +
-                                "WHERE\n" +
-                                "c.case_category = '" + caseCategory + "'" +
-                                "AND\n" +
-                                "c.case_subcategory = '" + caseSubcategory + "'" +
-                                "AND\n" +
-                                "c.created_time BETWEEN '" + startDate + "' AND '" + endDate +"'" +
-                                "ORDER BY\n" +
-                                "c.created_time DESC\n" +
-                                "LIMIT\n" +
-                                limit
-                ).setUseLegacySql(false).build();
+        if (!caseSubcategory.equals("") && caseSubcategory != null) {
+            queryJobConfiguration =
+                    QueryJobConfiguration.newBuilder(
+                            "SELECT\n" +
+                                    "c.case_number as case_number,\n" +
+                                    "c.case_category as case_category,\n" +
+                                    "c.case_subcategory as case_subcategory,\n" +
+                                    "pii.notes__c as notes,\n" +
+                                    "c.created_time as created_time\n" +
+                                    "FROM\n" +
+                                    "`ops.cases` c\n" +
+                                    "INNER JOIN\n" +
+                                    "`ops_pii.categorization_notes` pii\n" +
+                                    "ON\n" +
+                                    "pii.case_number = c.case_number\n" +
+                                    "WHERE\n" +
+                                    "c.case_category = '" + caseCategory + "'" +
+                                    "AND\n" +
+                                    "c.case_subcategory = '" + caseSubcategory + "'" +
+                                    "AND\n" +
+                                    "c.created_time BETWEEN '" + startDate + "' AND '" + endDate +"'" +
+                                    "ORDER BY\n" +
+                                    "c.created_time DESC\n" +
+                                    "LIMIT\n" +
+                                    limit
+                    ).setUseLegacySql(false).build();
+            logger.info("Querying BigQuery with: \n" + queryJobConfiguration.getQuery());
+        } else {
+            queryJobConfiguration =
+                    QueryJobConfiguration.newBuilder(
+                            "SELECT\n" +
+                                    "c.case_number as case_number,\n" +
+                                    "c.case_category as case_category,\n" +
+                                    "c.case_subcategory as case_subcategory,\n" +
+                                    "pii.notes__c as notes,\n" +
+                                    "c.created_time as created_time\n" +
+                                    "FROM\n" +
+                                    "`ops.cases` c\n" +
+                                    "INNER JOIN\n" +
+                                    "`ops_pii.categorization_notes` pii\n" +
+                                    "ON\n" +
+                                    "pii.case_number = c.case_number\n" +
+                                    "WHERE\n" +
+                                    "c.case_category = '" + caseCategory + "'\n" +
+                                    "AND\n" +
+                                    "c.created_time BETWEEN '" + startDate + "' AND '" + endDate +"'\n" +
+                                    "ORDER BY\n" +
+                                    "c.created_time DESC\n" +
+                                    "LIMIT\n" +
+                                    limit
+                    ).setUseLegacySql(false).build();
+            logger.info("Note: no case subcategory provided for query");
+            logger.info("Querying BigQuery with: \n" + queryJobConfiguration.getQuery());
+        }
+
 
         JobId jobId = JobId.of(UUID.randomUUID().toString());
         Job queryJob = bigQuery.create(JobInfo.newBuilder(queryJobConfiguration).setJobId(jobId).build());
@@ -305,8 +374,9 @@ public class GoogleCloudUtilities {
         monkeyLearn = new MonkeyLearn("3a1676bd86dc12eb834f90d160522b799ade3d18");
         String moduleId = "ex_EjosnyKK";
         String[] text = {texts};
+        ExtraParam[] extraParams = {new ExtraParam("max_keywords", "25")};
         try {
-            MonkeyLearnResponse response = monkeyLearn.extractors.extract(moduleId, text);
+            MonkeyLearnResponse response = monkeyLearn.extractors.extract(moduleId, text, extraParams);
             JSONArray responseArray = response.arrayResult;
             JSONArray array2 = (JSONArray) responseArray.get(0);
             JSONObject object = (JSONObject) array2.get(0);
@@ -356,7 +426,11 @@ public class GoogleCloudUtilities {
 
     private SupportCaseReport computeSupportCaseReport(SupportCaseReport supportCaseReport, Document document) {
 
-        languageServiceClient = new AppApplication().getLanguageServiceClient();
+        try {
+            languageServiceClient = LanguageServiceClient.create();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         // Analyze the aggregate document
         logger.info("Sending support case document for analysis with entity extraction");

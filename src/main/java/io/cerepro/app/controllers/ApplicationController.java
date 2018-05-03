@@ -116,6 +116,7 @@ public class ApplicationController {
         }
     }
 
+    //TODO: Get rid of this
     @RequestMapping(value = "/analyze/sentiment", method = RequestMethod.GET)
     public ModelAndView analyzeSentimentForm(ModelAndView modelAndView, SentimentAnalysis sentimentAnalysis) {
         modelAndView.setViewName("analyze_sentiment");
@@ -125,6 +126,7 @@ public class ApplicationController {
     }
 
     //TODO Change this to have no view, and redirect to a view with id in the path
+    //TODO: Get rid of this
     @RequestMapping(value = "analyze/sentiment", method = RequestMethod.POST)
     public ModelAndView displaySentimentAnalysis(ModelAndView modelAndView, SentimentAnalysis sentimentAnalysis) {
 
@@ -186,10 +188,10 @@ public class ApplicationController {
     //    return false;
     //}
 
-    //TODO: Move this to a utility class to be shared across the app
+    //TODO: Move this to a utility class to be shared across the app, then delete
     private void analyzeSentiment(SentimentAnalysis sentimentAnalysis) {
         logger.info("In analyzeSentiment");
-        languageServiceClient = new AppApplication().getLanguageServiceClient();
+        //languageServiceClient = new AppApplication().getLanguageServiceClient();
 
         Entity entity;
 

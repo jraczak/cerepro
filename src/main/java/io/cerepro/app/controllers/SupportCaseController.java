@@ -33,6 +33,8 @@ public class SupportCaseController {
         //TODO: Add the rest of the support case categories
         ArrayList<String> categories = new ArrayList<>();
         categories.add("Instant Match");
+        categories.add("Refunds"); // No subcategories supported
+        categories.add("Quotes"); // No subcategories supported
 
         ArrayList<String> subcategories = new ArrayList<>();
         subcategories.add("Budget");
@@ -78,7 +80,7 @@ public class SupportCaseController {
                 supportCaseReport.getCaseSubcategory(),
                 dateFormat.format(supportCaseReport.getStartDate()),
                 dateFormat.format(supportCaseReport.getEndDate()),
-                500);
+                1500);
         logger.info("Support case report is " + supportCaseReport.toString());
 
         return "redirect:/support_case_reports/" + supportCaseReport.getId();

@@ -122,7 +122,7 @@
 		<dependency>
 			<groupId>com.monkeylearn</groupId>
 			<artifactId>monkeylearn-java</artifactId>
-			<version>0.1.4</version>
+			<version>0.1.5</version>
 			<scope>compile</scope>
 		</dependency>
 

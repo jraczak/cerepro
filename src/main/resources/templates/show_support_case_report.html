@@ -10,28 +10,32 @@
 <nav th:replace="fragments/header :: header"></nav>
 <div class="container">
     <div class="row">
-<h1>Woo, you found <span th:text="${support_case_report.getName()}"></span>!</h1>
+        <div class="col-xl">
+            <h1><span th:text="${support_case_report.getName()}"></span></h1>
+            <small id="notes" class="text-muted"><span th:text="${support_case_report.getNotes()}"></span></small><br>
+            <small id="run-on" class="text-muted">Run on <span th:text="${support_case_report.getCreatedAt()}"></span> </small>
+            <p><span th:text="${support_case_report.getMonkeyLearnKeywords().size()}"></span> keyphrases extracted</p>
+        </div>
     </div>
     <div class="row">
-<p><span th:text="${support_case_report.getMonkeyLearnKeywords().size()}"></span> keywords logged</p>
 
         <div class="card" th:each="keyword : ${support_case_report.getMonkeyLearnKeywords()}">
             <div class="card-body">
                 <h3 class="card-title"><span th:text="${keyword.getWord()}"></span></h3>
-                <p class="card-text"><span th:text="${keyword.getRelevance()}"></span> </p>
+                <p class="card-text"><span th:text="${keyword.getCount()}"></span> occurrences, <span th:text="${keyword.getRelevance()}"></span> relevance</p>
                 <ul th:each="sample : ${keyword.getSamples()}">
                     <li><span th:text="${sample}"></span></li>
                 </ul>
             </div>
         </div>
 
-<ul>
-    <li th:each="entity : ${support_case_report.getEntities()}"><span th:text="${entity.getName()}"></span> - <span th:text="${entity.getMentionsCount()}"> mentions</span> </li>
-</ul>
+        <ul>
+            <li th:each="entity : ${support_case_report.getEntities()}"><span th:text="${entity.getName()}"></span> - <span th:text="${entity.getMentionsCount()}"> mentions</span> </li>
+        </ul>
 
-<script src="webjars/jquery/3.3.1/jquery.min.js"></script>
-<script src="webjars/bootstrap/4.0.0-2/js/bootstrap.min.js"></script>
-</div>
+        <script src="webjars/jquery/3.3.1/jquery.min.js"></script>
+        <script src="webjars/bootstrap/4.0.0-2/js/bootstrap.min.js"></script>
+    </div>
 </div>
 </body>
 </html>

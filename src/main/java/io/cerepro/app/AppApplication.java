@@ -1,6 +1,7 @@
 package io.cerepro.app;
 
 import com.google.cloud.language.v1.LanguageServiceClient;
+import com.google.cloud.language.v1beta2.LanguageServiceSettings;
 import com.monkeylearn.MonkeyLearn;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -20,12 +21,12 @@ public class AppApplication {
 		return monkeyLearn;
 	}
 
-	public LanguageServiceClient getLanguageServiceClient() {
-		try {
-			return LanguageServiceClient.create();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
+	//public LanguageServiceClient getLanguageServiceClient() {
+	//	try {
+	//		return LanguageServiceClient.create();
+	//	} catch (IOException e) {
+	//		e.printStackTrace();
+	//	}
+	//	return null;
+	//}
 }
